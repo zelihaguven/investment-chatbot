@@ -1,0 +1,42 @@
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// CORS ayarları
+app.use(cors());
+
+// API isteklerini yönlendiren endpoint
+app.get('/api/:service', async (req, res) => {
+    const service = req.params.service;
+
+    let url;
+    switch (service) {
+        case 'currency':
+            url = 'https://api.ahlatcidoviz.com/api/v1/current';
+            break;
+        case 'stocks':
+            url = 'https://api.isyatirim.com.tr/api/v1/securities';
+            break;
+        case 'indexes':
+            url = 'https://www.borsaistanbul.com/data/indices';
+            break;
+        default:
+            return res.status(404).send('Service not found');
+    }
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('API request error:', error);
+        res.status(500).send('Error fetching data');
+    }
+});
+
+// Sunucuyu başlat
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
